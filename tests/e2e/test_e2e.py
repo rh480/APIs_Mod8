@@ -1,8 +1,12 @@
 # tests/e2e/test_e2e.py
 
 import pytest  # Import the pytest framework for writing and running tests
+from playwright.sync_api import expect  # type: ignore[reportMissingImports]  # Auto-waiting assertions for Playwright
+
 
 # The following decorators and functions define E2E tests for the FastAPI calculator application.
+
+BASE_URL = 'http://localhost:8000'
 
 @pytest.mark.e2e
 def test_hello_world(page, fastapi_server):
@@ -14,11 +18,11 @@ def test_hello_world(page, fastapi_server):
     that the server is running and serving the correct template.
     """
     # Navigate the browser to the homepage URL of the FastAPI application.
-    page.goto('http://localhost:8000')
+    page.goto(BASE_URL)
     
     # Use an assertion to check that the text within the first <h1> tag is exactly "Hello World".
     # If the text does not match, the test will fail.
-    assert page.inner_text('h1') == 'Hello World'
+    expect(page.locator('h1')).to_have_text('Hello World')
 
 @pytest.mark.e2e
 def test_calculator_add(page, fastapi_server):
@@ -30,7 +34,7 @@ def test_calculator_add(page, fastapi_server):
     that the result displayed is correct.
     """
     # Navigate the browser to the homepage URL of the FastAPI application.
-    page.goto('http://localhost:8000')
+    page.goto(BASE_URL)
     
     # Fill in the first number input field (with id 'a') with the value '10'.
     page.fill('#a', '10')
@@ -43,31 +47,62 @@ def test_calculator_add(page, fastapi_server):
     
     # Use an assertion to check that the text within the result div (with id 'result') is exactly "Result: 15".
     # This verifies that the addition operation was performed correctly and the result is displayed as expected.
-    assert page.inner_text('#result') == 'Calculation Result: 15'
+    expect(page.locator('#result')).to_have_text('Calculation Result: 15')
 
+@pytest.mark.e2e
+def test_calculator_subtract(page, fastapi_server):
+    """
+    Test the subtraction functionality of the calculator.
+    """
+    page.goto(BASE_URL)
+ 
+    page.fill('#a', '10')
+    page.fill('#b', '4')
+    page.click('button:text("Subtract")')
+ 
+    expect(page.locator('#result')).to_have_text('Calculation Result: 6')
+ 
+ 
+@pytest.mark.e2e
+def test_calculator_multiply(page, fastapi_server):
+    """
+    Test the multiplication functionality of the calculator.
+    """
+    page.goto(BASE_URL)
+ 
+    page.fill('#a', '6')
+    page.fill('#b', '7')
+    page.click('button:text("Multiply")')
+ 
+    expect(page.locator('#result')).to_have_text('Calculation Result: 42')
+ 
+ 
+@pytest.mark.e2e
+def test_calculator_divide(page, fastapi_server):
+    """
+    Test the division functionality of the calculator.
+    """
+    page.goto(BASE_URL)
+ 
+    page.fill('#a', '10')
+    page.fill('#b', '4')
+    page.click('button:text("Divide")')
+ 
+    expect(page.locator('#result')).to_have_text('Calculation Result: 2.5')
+ 
+ 
 @pytest.mark.e2e
 def test_calculator_divide_by_zero(page, fastapi_server):
     """
     Test the divide by zero functionality of the calculator.
-
-    This test simulates a user attempting to divide a number by zero using the calculator.
-    It fills in the numbers, clicks the "Divide" button, and verifies that the appropriate
-    error message is displayed. This ensures that the application correctly handles invalid
-    operations and provides meaningful feedback to the user.
+ 
+    Fills in the numbers, clicks "Divide", and waits for the error message that the
+    API returns (HTTP 400) to be displayed.
     """
-    # Navigate the browser to the homepage URL of the FastAPI application.
-    page.goto('http://localhost:8000')
-    
-    # Fill in the first number input field (with id 'a') with the value '10'.
+    page.goto(BASE_URL)
+ 
     page.fill('#a', '10')
-    
-    # Fill in the second number input field (with id 'b') with the value '0', attempting to divide by zero.
     page.fill('#b', '0')
-    
-    # Click the button that has the exact text "Divide". This triggers the division operation.
     page.click('button:text("Divide")')
-    
-    # Use an assertion to check that the text within the result div (with id 'result') is exactly
-    # "Error: Cannot divide by zero!". This verifies that the application handles division by zero
-    # gracefully and displays the correct error message to the user.
-    assert page.inner_text('#result') == 'Error: Cannot divide by zero!'
+ 
+    expect(page.locator('#result')).to_have_text('Error: Cannot divide by zero!')
