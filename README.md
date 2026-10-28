@@ -1,8 +1,17 @@
 # Module 8
 
+GitHub URL:
+https://github.com/rh480/APIs_Mod8
+
+
 Dockerhub URL: 
 https://hub.docker.com/repository/docker/rh48/601_module8/general
 
+Screenshots:
+
+screenshots/CalcUI.png
+
+screenshots/GitHubActionsTests.png
 
 # 📦 Project Setup
 
